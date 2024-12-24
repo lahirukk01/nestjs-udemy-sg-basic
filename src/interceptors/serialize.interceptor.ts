@@ -22,12 +22,22 @@ export class SerializeInterceptor implements NestInterceptor {
   constructor(private dto: IClassConstructor) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<object> {
-    return next
-      .handle()
-      .pipe(
-        map((data: User) =>
-          plainToClass(this.dto, data, { excludeExtraneousValues: true }),
-        ),
-      );
+    return next.handle().pipe(
+      map((data: object) => {
+        if ('user' in data) {
+          const user = plainToClass(this.dto, data.user, {
+            excludeExtraneousValues: true,
+          });
+
+          return { user };
+        } else if ('users' in data && Array.isArray(data.users)) {
+          return {
+            users: data.users.map((user: User) =>
+              plainToClass(this.dto, user, { excludeExtraneousValues: true }),
+            ),
+          };
+        }
+      }),
+    );
   }
 }

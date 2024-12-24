@@ -19,4 +19,8 @@ export class UsersService {
   findOneByEmail(email: string) {
     return this.repo.findOneBy({ email });
   }
+
+  findAll() {
+    return this.repo.find();
+  }
 }

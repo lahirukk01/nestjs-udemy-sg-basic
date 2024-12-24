@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -7,27 +6,55 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Session,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user';
 import { Serialize } from '../interceptors/serialize.interceptor';
+import { AuthService } from './AuthService';
+import { CurrentUserInterceptor } from 'src/interceptors/current-user.interceptor';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { User } from './user.entity';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 @Controller('auth')
+@UseInterceptors(CurrentUserInterceptor)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Serialize()
   @Post('signup')
-  async createUser(@Body() body: CreateUserDto) {
-    const existingUser = await this.usersService.findOneByEmail(body.email);
+  async createUser(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signUp(body.email, body.password);
 
-    if (existingUser) {
-      throw new BadRequestException('email in use');
-    }
+    session.userId = user.id;
+    return { user };
+  }
 
-    const user = await this.usersService.create(body.email, body.password);
+  @Serialize()
+  @Post('signin')
+  async signIn(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signIn(body.email, body.password);
 
-    return user;
+    session.userId = user.id;
+    return { user };
+  }
+
+  @Get('signout')
+  async signOut(@Session() session: any) {
+    session.userId = null;
+  }
+
+  @Serialize()
+  @UseGuards(AuthGuard)
+  @Get('whoami')
+  async whoAmI(@CurrentUser() user: User) {
+    return { user };
   }
 
   @Serialize()
@@ -39,6 +66,12 @@ export class UsersController {
       throw new NotFoundException('user not found');
     }
 
-    return user;
+    return { user };
+  }
+
+  @Serialize()
+  @Get()
+  async findAllUsers() {
+    return { users: await this.usersService.findAll() };
   }
 }

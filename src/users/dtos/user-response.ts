@@ -7,3 +7,8 @@ export class UserResponseDto {
   @Expose()
   email: string;
 }
+
+export class UserResponseWrapperDto {
+  @Expose()
+  user: UserResponseDto;
+}
