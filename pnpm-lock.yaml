@@ -47,9 +47,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
-      sqlite3:
-        specifier: ^5.1.7
-        version: 5.1.7
       typeorm:
         specifier: ^0.3.20
         version: 0.3.20(sqlite3@5.1.7)(ts-node@10.9.2(@types/node@20.17.10)(typescript@5.7.2))
@@ -102,6 +99,9 @@ importers:
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
+      sqlite3:
+        specifier: ^5.1.7
+        version: 5.1.7
       supertest:
         specifier: ^7.0.0
         version: 7.0.0
