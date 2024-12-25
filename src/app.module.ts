@@ -4,6 +4,7 @@ import {
   NestModule,
   ValidationPipe,
 } from '@nestjs/common';
+import { APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import cookieSession from 'cookie-session';
@@ -12,7 +13,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ReportsModule } from './reports/reports.module';
-import { APP_PIPE } from '@nestjs/core';
 
 type TDbType = 'mysql' | 'postgres' | 'sqlite' | 'mssql';
 

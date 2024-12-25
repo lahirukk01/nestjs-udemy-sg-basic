@@ -14,10 +14,10 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { AuthService } from './AuthService';
-import { CurrentUserInterceptor } from 'src/interceptors/current-user.interceptor';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
+import { CurrentUser } from '../decorators/current-user.decorator';
 import { User } from './user.entity';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { AuthGuard } from '../guards/auth.guard';
 
 @Controller('auth')
 @UseInterceptors(CurrentUserInterceptor)
