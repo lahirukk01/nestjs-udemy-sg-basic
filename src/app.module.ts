@@ -1,5 +1,13 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  ValidationPipe,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import cookieSession from 'cookie-session';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -22,6 +30,28 @@ import { ConfigModule } from '@nestjs/config';
     ReportsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({ transform: true, whitelist: true }),
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  constructor(private readonly configService: ConfigService) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(
+        cookieSession({
+          keys: [
+            this.configService.get<string>('COOKIE_KEY') ??
+              'default_cookie_key',
+          ],
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        }),
+      )
+      .forRoutes('*');
+  }
+}
