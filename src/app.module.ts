@@ -12,19 +12,27 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ReportsModule } from './reports/reports.module';
-import { ConfigModule } from '@nestjs/config';
+import { APP_PIPE } from '@nestjs/core';
+
+type TDbType = 'mysql' | 'postgres' | 'sqlite' | 'mssql';
+
+const shouldSyncDb = !['production', 'staging'].includes(process.env.NODE_ENV);
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Makes the ConfigModule available globally
+      envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'database.sqlite',
-      // autoLoadEntities: true,
-      synchronize: true,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: configService.get<TDbType>('DB_TYPE'),
+        database: configService.get<string>('DB_NAME'),
+        // autoLoadEntities: true,
+        synchronize: shouldSyncDb,
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      }),
     }),
     UsersModule,
     ReportsModule,
