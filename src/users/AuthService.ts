@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable, Session } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { UsersService } from './users.service';
-import { hashPasswordWithSalt } from 'src/utils/auth';
+import { hashPasswordWithSalt } from '../utils/auth';
 
 @Injectable()
 export class AuthService {
