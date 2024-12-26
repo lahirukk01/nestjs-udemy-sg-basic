@@ -18,6 +18,7 @@ import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { User } from './user.entity';
 import { AuthGuard } from '../guards/auth.guard';
+import { UserResponseDto } from './dtos/user-response';
 
 @Controller('auth')
 @UseInterceptors(CurrentUserInterceptor)
@@ -27,7 +28,7 @@ export class UsersController {
     private readonly authService: AuthService,
   ) {}
 
-  @Serialize()
+  @Serialize(UserResponseDto)
   @Post('signup')
   async createUser(@Body() body: CreateUserDto, @Session() session: any) {
     const user = await this.authService.signUp(body.email, body.password);
@@ -36,7 +37,7 @@ export class UsersController {
     return { user };
   }
 
-  @Serialize()
+  @Serialize(UserResponseDto)
   @Post('signin')
   async signIn(@Body() body: CreateUserDto, @Session() session: any) {
     const user = await this.authService.signIn(body.email, body.password);
@@ -50,14 +51,14 @@ export class UsersController {
     session.userId = null;
   }
 
-  @Serialize()
+  @Serialize(UserResponseDto)
   @UseGuards(AuthGuard)
   @Get('whoami')
   async whoAmI(@CurrentUser() user: User) {
     return { user };
   }
 
-  @Serialize()
+  @Serialize(UserResponseDto)
   @Get(':id')
   async findUser(@Param('id', ParseIntPipe) id: number) {
     const user = await this.usersService.findOneById(id);
@@ -69,7 +70,7 @@ export class UsersController {
     return { user };
   }
 
-  @Serialize()
+  @Serialize(UserResponseDto)
   @Get()
   async findAllUsers() {
     return { users: await this.usersService.findAll() };
