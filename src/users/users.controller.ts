@@ -2,64 +2,66 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   ParseIntPipe,
   Post,
   Session,
-  UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { AuthService } from './AuthService';
-import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
 import { CurrentUser } from '../decorators/current-user.decorator';
-import { User } from './user.entity';
-import { AuthGuard } from '../guards/auth.guard';
+import { User, UserRole } from './user.entity';
 import { UserResponseDto } from './dtos/user-response';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('auth')
-@UseInterceptors(CurrentUserInterceptor)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
   ) {}
 
-  @Serialize(UserResponseDto)
   @Post('signup')
+  @Serialize(UserResponseDto)
   async createUser(@Body() body: CreateUserDto, @Session() session: any) {
     const user = await this.authService.signUp(body.email, body.password);
 
-    session.userId = user.id;
+    const userClone = structuredClone(user);
+    delete userClone.password;
+    session.currentUser = userClone;
     return { user };
   }
 
-  @Serialize(UserResponseDto)
   @Post('signin')
+  @HttpCode(200)
+  @Serialize(UserResponseDto)
   async signIn(@Body() body: CreateUserDto, @Session() session: any) {
     const user = await this.authService.signIn(body.email, body.password);
-
-    session.userId = user.id;
+    const userClone = structuredClone(user);
+    delete userClone.password;
+    session.currentUser = userClone;
     return { user };
   }
 
-  @Get('signout')
+  @Post('signout')
+  @HttpCode(200)
   async signOut(@Session() session: any) {
-    session.userId = null;
+    session.currentUser = null;
   }
 
-  @Serialize(UserResponseDto)
-  @UseGuards(AuthGuard)
   @Get('whoami')
+  @Roles(UserRole.OWNER)
+  @Serialize(UserResponseDto)
   async whoAmI(@CurrentUser() user: User) {
     return { user };
   }
 
-  @Serialize(UserResponseDto)
   @Get(':id')
+  @Serialize(UserResponseDto)
   async findUser(@Param('id', ParseIntPipe) id: number) {
     const user = await this.usersService.findOneById(id);
 
@@ -70,8 +72,8 @@ export class UsersController {
     return { user };
   }
 
-  @Serialize(UserResponseDto)
   @Get()
+  @Serialize(UserResponseDto)
   async findAllUsers() {
     return { users: await this.usersService.findAll() };
   }

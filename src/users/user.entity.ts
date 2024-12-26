@@ -7,13 +7,16 @@ import {
 } from 'typeorm';
 import { Report } from '../reports/report.entity';
 
+export enum UserRole {
+  ADMIN = 'admin',
+  OWNER = 'owner',
+  ALL = 'all',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
-
-  // @Column()
-  // name: string;
 
   @Column()
   @Unique(['email'])
@@ -21,6 +24,13 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({
+    type: 'varchar',
+    length: 10,
+    default: UserRole.OWNER,
+  })
+  role: UserRole;
 
   @OneToMany(() => Report, (report) => report.user)
   reports: Report[];

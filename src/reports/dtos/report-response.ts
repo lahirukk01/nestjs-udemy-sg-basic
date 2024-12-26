@@ -26,6 +26,9 @@ export class ReportResponseDto {
   miles: number;
 
   @Expose()
+  approved: boolean;
+
+  @Expose()
   @Transform(({ obj }) => {
     return obj.user?.id;
   })
