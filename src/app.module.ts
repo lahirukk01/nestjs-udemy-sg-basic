@@ -8,17 +8,13 @@ import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import cookieSession from 'cookie-session';
+import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ReportsModule } from './reports/reports.module';
 import { AuthGuard } from './guards/auth.guard';
-// import { CurrentUserMiddleware } from './middleware/current-user.middleware';
-
-type TDatabase = 'mysql' | 'postgres' | 'sqlite' | 'mssql';
-
-const shouldSyncDb = !['production', 'staging'].includes(process.env.NODE_ENV);
 
 @Module({
   imports: [
@@ -27,15 +23,26 @@ const shouldSyncDb = !['production', 'staging'].includes(process.env.NODE_ENV);
       envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
     TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: configService.get<TDatabase>('DB_TYPE'),
-        database: configService.get<string>('DB_NAME'),
-        // autoLoadEntities: true,
-        synchronize: shouldSyncDb,
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      }),
+      useFactory: async () => {
+        // For test env we need ts file. Else we need js file
+        const ext = process.env.NODE_ENV === 'test' ? 'ts' : 'js';
+        const { default: dataSource } = await import(
+          join(__dirname, '..', `ormconfig.${ext}`)
+        );
+
+        return dataSource.options;
+      },
     }),
+    // TypeOrmModule.forRootAsync({
+    //   inject: [ConfigService],
+    //   useFactory: async (configService: ConfigService) => ({
+    //     type: configService.get<TDatabase>('DB_TYPE'),
+    //     database: configService.get<string>('DB_NAME'),
+    //     // autoLoadEntities: true,
+    //     synchronize: shouldSyncDb,
+    //     entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    //   }),
+    // }),
     UsersModule,
     ReportsModule,
   ],

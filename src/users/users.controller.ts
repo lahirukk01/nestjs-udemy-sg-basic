@@ -16,7 +16,7 @@ import { AuthService } from './AuthService';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { User, UserRole } from './user.entity';
 import { UserResponseDto } from './dtos/user-response';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Roles } from '../decorators/roles.decorator';
 
 @Controller('auth')
 export class UsersController {

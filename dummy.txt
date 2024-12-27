@@ -1,0 +1,20 @@
+Process args [
+  '/Users/lahirukk/.nvm/versions/node/v20.11.0/bin/node',
+  '/Users/lahirukk/Desktop/Projects/nestjs-udemy-sg-basic/dist/src/main'
+]
+
+Process args [
+  '/Users/lahirukk/.nvm/versions/node/v20.11.0/bin/node',
+  '/Users/lahirukk/Desktop/Projects/nestjs-udemy-sg-basic/node_modules/typeorm/cli.js',
+  'migration:show',
+  '-d',
+  'ormconfig.ts'
+]
+
+ Loading ormconfig for NODE_ENV: test [
+		'/Users/lahirukk/.nvm/versions/node/v20.11.0/bin/node',
+		'/Users/lahirukk/Desktop/Projects/nestjs-udemy-sg-basic/node_modules/jest/bin/jest.js',
+		'--config',
+		'./test/jest-e2e.json',
+		'--maxWorkers=1'
+	]
